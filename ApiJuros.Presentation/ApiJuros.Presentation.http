@@ -1,0 +1,6 @@
+@ApiJuros.Presentation_HostAddress = http://localhost:5255
+
+GET {{ApiJuros.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
