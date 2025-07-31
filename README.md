@@ -1,91 +1,123 @@
-Arquitetura do Projeto
+ÔªøCom certeza\! Deixar um texto t√©cnico "bonitinho" e f√°cil de ler √© fundamental. Usando os recursos do Markdown, como t√≠tulos, listas, blocos de c√≥digo e emojis, podemos transformar essa documenta√ß√£o em algo muito mais claro e organizado.
 
-A soluÁ„o È dividida em quatro camadas, seguindo a regra de dependÍncia onde as camadas externas apontam para as internas.
+Aqui est√° o seu conte√∫do, formatado de maneira profissional:
 
-ApiJuros.Domain: A camada mais interna. ContÈm as entidades e a lÛgica de negÛcio mais pura, sem dependÍncias externas. (Neste projeto simples, ela est· vazia, mas serve como base para futuras regras de negÛcio complexas).
+-----
 
-ApiJuros.Application: ContÈm a lÛgica da aplicaÁ„o (casos de uso). Define interfaces que s„o implementadas pelas camadas externas e utiliza os DTOs (Data Transfer Objects) para trafegar dados.
+## üèõÔ∏è Arquitetura do Projeto
 
-ApiJuros.Infrastructure: Implementa as interfaces definidas na camada de Application. … respons·vel por detalhes tÈcnicos como acesso a banco de dados, consumo de outras APIs, etc. (Neste projeto, a implementaÁ„o do serviÁo est· na camada de Application por simplicidade, mas em um caso real, ela estaria aqui).
+A solu√ß√£o √© dividida em quatro camadas, seguindo a regra de depend√™ncia onde as camadas externas sempre apontam para as internas.
 
-ApiJuros.Presentation: A camada de entrada da aplicaÁ„o. No nosso caso, È uma API Web ASP.NET Core que expıe os endpoints para o mundo externo e depende da camada de Application para executar as aÁıes.
+  * üì¶ **`ApiJuros.Domain`**: A camada mais interna. Cont√©m as entidades e a l√≥gica de neg√≥cio mais pura, sem depend√™ncias externas. (Neste projeto simples, ela est√° vazia, mas serve como base para futuras regras de neg√≥cio complexas).
 
+  * ‚öôÔ∏è **`ApiJuros.Application`**: Cont√©m a l√≥gica da aplica√ß√£o (casos de uso). Define interfaces que s√£o implementadas pelas camadas externas e utiliza os DTOs (Data Transfer Objects) para trafegar dados.
 
-ApiJuros.Presentation -> ApiJuros.Infrastructure -> ApiJuros.Application -> ApiJuros.Domain
+  * üèóÔ∏è **`ApiJuros.Infrastructure`**: Implementa as interfaces definidas na camada de `Application`. √â respons√°vel por detalhes t√©cnicos como acesso a banco de dados, consumo de outras APIs, etc. (Neste projeto, a implementa√ß√£o do servi√ßo est√° na camada de `Application` por simplicidade, mas em um caso real, ela estaria aqui).
 
+  * üåê **`ApiJuros.Presentation`**: A camada de entrada da aplica√ß√£o. No nosso caso, √© uma API Web ASP.NET Core que exp√µe os endpoints para o mundo externo e depende da camada de `Application` para executar as a√ß√µes.
 
-Tecnologias Utilizadas
+**Fluxo de Depend√™ncia:**
+`Presentation` ‚Üí `Infrastructure` ‚Üí `Application` ‚Üí `Domain`
 
-.NET 8 (ou superior)
+\<br\>
 
-ASP.NET Core: Para a construÁ„o da API.
+## ‚ú® Tecnologias Utilizadas
 
-Swagger (Swashbuckle): Para documentaÁ„o interativa da API.
+  * **.NET 8** (ou superior)
+  * **ASP.NET Core**: Para a constru√ß√£o da API.
+  * **Swagger (Swashbuckle)**: Para documenta√ß√£o interativa da API.
+  * **FluentValidation**: Para valida√ß√£o declarativa e robusta dos dados de entrada.
 
-FluentValidation: Para validaÁ„o declarativa e robusta dos dados de entrada.
+\<br\>
 
+## üöÄ Instala√ß√£o e Execu√ß√£o
 
-# Instale as dependÍncias necess·rias para validaÁ„o e documentaÁ„o.
+### 1\. Instale as Depend√™ncias (NuGet)
 
+Instale os pacotes necess√°rios para valida√ß√£o e documenta√ß√£o da API.
+
+```bash
 # Adicione o FluentValidation ao projeto Application
 dotnet add ApiJuros.Application/ApiJuros.Application.csproj package FluentValidation
 
-# Adicione o Swagger e a integraÁ„o do FluentValidation ao projeto Presentation
+# Adicione o Swagger e a integra√ß√£o do FluentValidation ao projeto Presentation
 dotnet add ApiJuros.Presentation/ApiJuros.Presentation.csproj package Swashbuckle.AspNetCore
 dotnet add ApiJuros.Presentation/ApiJuros.Presentation.csproj package FluentValidation.AspNetCore
+```
 
-Executar a AplicaÁ„o
-Antes de executar pela primeira vez, È crucial confiar no certificado de desenvolvimento local para usar HTTPS.
+### 2\. Execute a Aplica√ß√£o
 
-#  Navegue para a pasta da API
+Antes de rodar, √© crucial confiar no certificado de desenvolvimento local para usar HTTPS.
+
+```bash
+# (Execute apenas uma vez por m√°quina para confiar no certificado HTTPS)
+dotnet dev-certs https --trust
+
+# Navegue para a pasta da API
 cd ApiJuros.Presentation
 
-#  Execute a aplicaÁ„o
+# Execute a aplica√ß√£o
 dotnet run
+```
 
-O terminal mostrar· que o servidor est· rodando, geralmente em https://localhost:7xxx e http://localhost:5xxx.
+O terminal mostrar√° que o servidor est√° rodando, geralmente em `https://localhost:7xxx` e `http://localhost:5xxx`.
 
+-----
 
-Como Usar a API
-ApÛs executar a aplicaÁ„o, abra seu navegador e acesse a documentaÁ„o interativa do Swagger.
+## üí° Como Usar a API
 
-URL do Swagger: https://localhost:7255/swagger (a porta pode variar).
+Ap√≥s executar a aplica√ß√£o, abra seu navegador e acesse a documenta√ß√£o interativa do Swagger.
 
-Endpoint de C·lculo
-POST /api/FinancialCalculator/calculate-compound-interest
+> **URL do Swagger:** [https://localhost:7255/swagger](https://www.google.com/search?q=https://localhost:7255/swagger) (a porta pode variar).
 
-Calcula o valor final e os juros totais de um investimento com base em um valor inicial, uma taxa de juros mensal e um perÌodo em meses.
+### Endpoint: `POST /api/FinancialCalculator/calculate-compound-interest`
 
-Exemplo de Sucesso
-Corpo da RequisiÁ„o (Request Body):
+Calcula o valor final e os juros totais de um investimento com base em um valor inicial, uma taxa de juros mensal e um per√≠odo em meses.
 
+-----
+
+#### ‚úÖ Exemplo de Sucesso
+
+**Corpo da Requisi√ß√£o (Request Body):**
+
+```json
 {
   "initialValue": 1000,
   "monthlyInterestRate": 1.5,
   "timeInMonths": 24
 }
+```
 
-Resposta de Sucesso (CÛdigo 200 OK):
+**Resposta (C√≥digo `200 OK`):**
 
+```json
 {
   "investedAmount": 1000,
-  "finalAmount": 1429.50,
-  "totalInterest": 429.50,
+  "finalAmount": 1429.5,
+  "totalInterest": 429.5,
   "timeInMonths": 24
 }
+```
 
-Se vocÍ enviar dados inv·lidos (ex: valores negativos), a API retornar· um erro 400 Bad Request com uma mensagem clara.
+-----
 
-Corpo da RequisiÁ„o (Inv·lido):
+#### ‚ùå Exemplo de Valida√ß√£o (Erro)
 
+Se voc√™ enviar dados inv√°lidos (ex: valores negativos), a API retornar√° um erro `400 Bad Request`.
+
+**Corpo da Requisi√ß√£o (Inv√°lido):**
+
+```json
 {
   "initialValue": -100,
   "monthlyInterestRate": 1,
   "timeInMonths": 12
 }
+```
 
-Resposta de Erro (CÛdigo 400 Bad Request):
+**Resposta (C√≥digo `400 Bad Request`):**
 
+```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
   "title": "One or more validation errors occurred.",
@@ -96,3 +128,4 @@ Resposta de Erro (CÛdigo 400 Bad Request):
     ]
   }
 }
+```
