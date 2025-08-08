@@ -13,16 +13,12 @@ A solução é dividida em quatro camadas, seguindo a regra de dependência onde
 **Fluxo de Dependência:**
 `Presentation` → `Infrastructure` → `Application` → `Domain`
 
-\<br\>
-
 ## ✨ Tecnologias Utilizadas
 
   * **.NET 8** (ou superior)
   * **ASP.NET Core**: Para a construção da API.
   * **Swagger (Swashbuckle)**: Para documentação interativa da API.
   * **FluentValidation**: Para validação declarativa e robusta dos dados de entrada.
-
-\<br\>
 
 ## 🚀 Instalação e Execução
 
