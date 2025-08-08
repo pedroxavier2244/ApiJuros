@@ -1,9 +1,3 @@
-﻿Com certeza\! Deixar um texto técnico "bonitinho" e fácil de ler é fundamental. Usando os recursos do Markdown, como títulos, listas, blocos de código e emojis, podemos transformar essa documentação em algo muito mais claro e organizado.
-
-Aqui está o seu conteúdo, formatado de maneira profissional:
-
------
-
 ## 🏛️ Arquitetura do Projeto
 
 A solução é dividida em quatro camadas, seguindo a regra de dependência onde as camadas externas sempre apontam para as internas.
