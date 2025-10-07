@@ -1,5 +1,9 @@
-﻿using System.Net;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Net;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ApiJuros.Presentation.Middleware
 {
@@ -7,44 +11,58 @@ namespace ApiJuros.Presentation.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
+        private readonly IWebHostEnvironment _env;
 
-    
-        public GlobalExceptionHandlerMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlerMiddleware> logger) 
+        public GlobalExceptionHandlerMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlerMiddleware> logger, IWebHostEnvironment env)
         {
-            _next = next; 
-            _logger = logger; 
+            _next = next;
+            _logger = logger;
+            _env = env;
         }
 
-   
-        public async Task InvokeAsync(HttpContext context) 
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await _next(context); 
+                await _next(context);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unhandled exception has occurred."); 
-                await HandleExceptionAsync(context, ex); 
+                _logger.LogError(ex, "An unhandled exception has occurred.");
+                await HandleExceptionAsync(context, ex);
             }
         }
 
-
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception) 
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            context.Response.ContentType = "application/json"; 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; 
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            var response = new
+            object response;
+
+            if (_env.IsDevelopment())
             {
-                error = new
+                response = new
                 {
-                    message = "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.", 
-                        details = exception.Message 
-                }
-            };
+                    error = new
+                    {
+                        message = "Ocorreu um erro inesperado.",
+                        details = exception.ToString() 
+                    }
+                };
+            }
+            else
+            {
+                response = new
+                {
+                    error = new
+                    {
+                        message = "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde."
+                    }
+                };
+            }
 
-            return context.Response.WriteAsync(JsonSerializer.Serialize(response)); 
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
     }
 }

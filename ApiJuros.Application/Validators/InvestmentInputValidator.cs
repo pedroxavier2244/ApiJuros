@@ -1,21 +1,23 @@
-﻿using FluentValidation;
-using ApiJuros.Application.DTOs;
+﻿using ApiJuros.Application.DTOs;
+using FluentValidation;
 
 namespace ApiJuros.Application.Validators
 {
     public class InvestmentInputValidator : AbstractValidator<InvestmentInput>
     {
-   
-        public InvestmentInputValidator() 
+        public InvestmentInputValidator()
         {
             RuleFor(x => x.InitialValue)
-                .GreaterThan(0).WithMessage("O valor inicial do investimento deve ser positivo."); 
+                .GreaterThan(0)
+                .WithMessage("O valor inicial do investimento deve ser positivo.");
 
             RuleFor(x => x.MonthlyInterestRate)
-                .GreaterThan(0).WithMessage("A taxa de rendimento mensal deve ser positiva."); 
+                .NotNull()
+                .WithMessage("A taxa de juros mensal é obrigatória.");
 
             RuleFor(x => x.TimeInMonths)
-                .GreaterThan(0).WithMessage("O tempo em meses deve ser positivo."); 
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("O tempo em meses não pode ser negativo.");
         }
     }
 }
