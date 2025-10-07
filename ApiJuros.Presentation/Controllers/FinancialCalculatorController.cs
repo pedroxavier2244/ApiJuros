@@ -1,26 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ApiJuros.Application.DTOs;
 using ApiJuros.Application.Interfaces;
-using Asp.Versioning; // Verifique se está usando este namespace
+using Asp.Versioning; 
 
-namespace ApiJuros.Presentation.Controllers;
-
-[ApiController]
-[ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")]
-public class FinancialCalculatorController : ControllerBase
+namespace ApiJuros.Presentation.Controllers
 {
-    private readonly IFinancialCalculatorService _calculatorService;
-
-    public FinancialCalculatorController(IFinancialCalculatorService calculatorService)
+    [ApiController]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    public class FinancialCalculatorController : ControllerBase
     {
-        _calculatorService = calculatorService;
-    }  
+        private readonly IFinancialCalculatorService _calculatorService;
 
-    [HttpPost("calculate-compound-interest")]
-    public IActionResult CalculateCompoundInterest([FromBody] InvestmentInput investment)
-    {
-        var result = _calculatorService.CalculateCompoundInterest(investment);
-        return Ok(result);
+        public FinancialCalculatorController(IFinancialCalculatorService calculatorService)
+        {
+            _calculatorService = calculatorService;
+        }  
+
+        [HttpPost("calculate-compound-interest")]
+        public IActionResult CalculateCompoundInterest([FromBody] InvestmentInput investment)
+        {
+            var result = _calculatorService.CalculateCompoundInterest(investment);
+            return Ok(result);
+        }
     }
 }
