@@ -1,4 +1,3 @@
-
 using Xunit;
 using FluentValidation.TestHelper;
 using ApiJuros.Application.DTOs;
@@ -21,16 +20,7 @@ namespace ApiJuros.Test.Validators
             var model = new InvestmentInput(0, 1, 12);
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(x => x.InitialValue)
-                .WithErrorMessage("O valor inicial do investimento deve ser positivo.");
-        }
-
-        [Fact]
-        public void Should_Have_Error_When_InitialValue_Is_Negative()
-        {
-            var model = new InvestmentInput(-100, 1, 12);
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(x => x.InitialValue)
-                .WithErrorMessage("O valor inicial do investimento deve ser positivo.");
+                  .WithErrorMessage("O valor inicial do investimento deve ser positivo.");
         }
 
         [Fact]
@@ -47,7 +37,7 @@ namespace ApiJuros.Test.Validators
             var model = new InvestmentInput(100, 1, -1);
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(x => x.TimeInMonths)
-                .WithErrorMessage("O tempo em meses não pode ser negativo.");
+                  .WithErrorMessage("O tempo em meses não pode ser negativo.");
         }
 
         [Fact]
@@ -59,11 +49,20 @@ namespace ApiJuros.Test.Validators
         }
 
         [Fact]
-        public void Should_Not_Have_Error_When_TimeInMonths_Is_Positive()
+        public void Should_Have_Error_When_MonthlyInterestRate_Is_Negative()
         {
-            var model = new InvestmentInput(100, 1, 12);
+            var model = new InvestmentInput(100, -1, 12);
             var result = _validator.TestValidate(model);
-            result.ShouldNotHaveValidationErrorFor(x => x.TimeInMonths);
+            result.ShouldHaveValidationErrorFor(x => x.MonthlyInterestRate)
+                .WithErrorMessage("A taxa de juros mensal não pode ser negativa.");
+        }
+
+        [Fact]
+        public void Should_Not_Have_Error_When_MonthlyInterestRate_Is_Zero()
+        {
+            var model = new InvestmentInput(100, 0, 12);
+            var result = _validator.TestValidate(model);
+            result.ShouldNotHaveValidationErrorFor(x => x.MonthlyInterestRate);
         }
     }
 }

@@ -1,4 +1,3 @@
-
 using Xunit;
 using AutoMapper;
 using ApiJuros.Application.Mappings;
