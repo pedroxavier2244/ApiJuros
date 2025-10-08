@@ -23,8 +23,6 @@ namespace ApiJuros.Test.Services
 
         private void SetupMapper(InvestmentInput input)
         {
-            // Configura o mock do IMapper para retornar um objeto base quando for chamado.
-            // Isso isola o teste da lógica real de mapeamento.
             var baseOutput = new InvestmentOutput
             {
                 InvestedAmount = input.InitialValue,
@@ -87,10 +85,9 @@ namespace ApiJuros.Test.Services
             decimal initialValue = 100;
             int months = 12;
             decimal annualInterestRate = 1; // 1% a.a
-            decimal expectedAmount = 101.00m; // Valor correto é 101.00
+            decimal expectedAmount = 101.00m; 
 
-            // O método interno de cálculo também usa o Mapper, então precisamos configurá-lo.
-            // O AutoMocker é inteligente o suficiente para usar o mesmo mock.
+
             _mocker.GetMock<IMapper>().Setup(m => m.Map<InvestmentOutput>(It.IsAny<InvestmentInput>()))
                 .Returns((InvestmentInput i) => new InvestmentOutput { InvestedAmount = i.InitialValue, TimeInMonths = i.TimeInMonths });
 
@@ -109,7 +106,7 @@ namespace ApiJuros.Test.Services
             decimal initialValue = 500;
             int months = 6;
             decimal annualInterestRate = 2; // 2% a.a.
-            decimal expectedAmount = 504.97m; // Valor correto é 504.97
+            decimal expectedAmount = 504.97m; 
 
             _mocker.GetMock<IMapper>().Setup(m => m.Map<InvestmentOutput>(It.IsAny<InvestmentInput>()))
                 .Returns((InvestmentInput i) => new InvestmentOutput { InvestedAmount = i.InitialValue, TimeInMonths = i.TimeInMonths });
