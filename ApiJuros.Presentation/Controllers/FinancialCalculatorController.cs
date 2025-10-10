@@ -39,6 +39,7 @@ namespace ApiJuros.Presentation.Controllers
 
         [HttpPost("calculate-with-selic-rate")]
         [ProducesResponseType(typeof(InvestmentOutput), 200)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> CalculateWithSelicRate([FromBody] InvestmentInputWithoutRate input)
         {

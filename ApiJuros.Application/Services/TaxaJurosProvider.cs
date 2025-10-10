@@ -1,19 +1,20 @@
 ﻿using ApiJuros.Application.DTOs;
 using ApiJuros.Application.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.Net.Http.Json; 
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace ApiJuros.Application.Services
 {
     public class TaxaJurosProvider : ITaxaJurosProvider
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
         private readonly ILogger<TaxaJurosProvider> _logger;
         private const string BcbApiUrl = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json";
 
-        public TaxaJurosProvider(IHttpClientFactory httpClientFactory, ILogger<TaxaJurosProvider> logger)
+        public TaxaJurosProvider(HttpClient httpClient, ILogger<TaxaJurosProvider> logger)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
             _logger = logger;
         }
 
@@ -21,11 +22,9 @@ namespace ApiJuros.Application.Services
         {
             _logger.LogInformation("Iniciando busca da taxa de juros na API do BCB.");
 
-            var httpClient = _httpClientFactory.CreateClient();
-
             try
             {
-                var bcbResponse = await httpClient.GetFromJsonAsync<BcbApiResponse[]>(BcbApiUrl);
+                var bcbResponse = await _httpClient.GetFromJsonAsync<BcbApiResponse[]>(BcbApiUrl);
 
                 if (bcbResponse is null || bcbResponse.Length == 0)
                 {

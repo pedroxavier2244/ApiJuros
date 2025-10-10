@@ -1,22 +1,26 @@
 ﻿using ApiJuros.Application.DTOs;
 using ApiJuros.Application.Interfaces;
+using ApiJuros.Domain;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace ApiJuros.Application.Services
 {
     public class FinancialCalculatorService : IFinancialCalculatorService
     {
-        private const int PercentageDivisor = 100;
-        private const int DecimalPlacesToRound = 2;
         private readonly IMapper _mapper;
         private readonly ILogger<FinancialCalculatorService> _logger;
+        private readonly ISimulationRepository _simulationRepository;
+        private const int PercentageDivisor = 100;
+        private const int DecimalPlacesToRound = 2;
 
-        public FinancialCalculatorService(IMapper mapper, ILogger<FinancialCalculatorService> logger)
+        public FinancialCalculatorService(IMapper mapper, ILogger<FinancialCalculatorService> logger, ISimulationRepository simulationRepository)
         {
             _mapper = mapper;
             _logger = logger;
+            _simulationRepository = simulationRepository;
         }
 
         public InvestmentOutput CalculateCompoundInterest(InvestmentInput input)
@@ -29,29 +33,24 @@ namespace ApiJuros.Application.Services
             {
                 _logger.LogWarning("O cálculo foi solicitado para 0 meses. O juros total será zero.");
             }
-
             decimal finalAmount = input.InitialValue;
             for (int i = 0; i < input.TimeInMonths; i++)
             {
                 finalAmount *= (1 + monthlyRate);
             }
-
             var roundedFinalAmount = Math.Round(finalAmount, DecimalPlacesToRound);
             var totalInterest = roundedFinalAmount - input.InitialValue;
-
             var output = _mapper.Map<InvestmentOutput>(input);
             var finalResult = output with
             {
                 FinalAmount = roundedFinalAmount,
                 TotalInterest = totalInterest
             };
-
             _logger.LogInformation("Cálculo finalizado. Valor final: {FinalAmount}", finalResult.FinalAmount);
-
             return finalResult;
         }
 
-        public Task<InvestmentOutput> CalculateCompoundInterestWithAnnualRateAsync(decimal initialValue, int timeInMonths, decimal annualInterestRate)
+        public async Task<InvestmentOutput> CalculateCompoundInterestWithAnnualRateAsync(decimal initialValue, int timeInMonths, decimal annualInterestRate)
         {
             var monthlyInterestRate = ConverterTaxaAnualParaMensalEquivalente(annualInterestRate);
 
@@ -59,7 +58,20 @@ namespace ApiJuros.Application.Services
 
             var result = CalculateCompoundInterest(input);
 
-            return Task.FromResult(result);
+            _logger.LogInformation("Salvando simulação no banco de dados...");
+            var simulation = new Simulation
+            {
+                Id = Guid.NewGuid(),
+                InitialValue = initialValue,
+                TimeInMonths = timeInMonths,
+                AnnualInterestRate = annualInterestRate,
+                FinalAmount = result.FinalAmount,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _simulationRepository.AddAsync(simulation);
+            _logger.LogInformation("Simulação salva com sucesso.");
+
+            return result;
         }
 
         private decimal ConverterTaxaAnualParaMensalEquivalente(decimal taxaAnualPercentual)

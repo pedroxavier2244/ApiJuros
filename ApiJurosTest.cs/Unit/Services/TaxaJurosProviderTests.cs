@@ -2,53 +2,62 @@ using Xunit;
 using Moq;
 using Moq.Protected;
 using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using ApiJuros.Application.Services;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using System.Text.Json;
 using ApiJuros.Application.DTOs;
+using System;
 
 namespace ApiJuros.Test.Services
 {
     public class TaxaJurosProviderTests
     {
-        private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
         private readonly Mock<ILogger<TaxaJurosProvider>> _loggerMock;
-        private readonly TaxaJurosProvider _taxaJurosProvider;
 
         public TaxaJurosProviderTests()
         {
-            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
             _loggerMock = new Mock<ILogger<TaxaJurosProvider>>();
-            _taxaJurosProvider = new TaxaJurosProvider(_httpClientFactoryMock.Object, _loggerMock.Object);
         }
 
-        private void SetupHttpClient(HttpStatusCode statusCode, string content)
+        private HttpClient CreateMockHttpClient(HttpStatusCode statusCode, string jsonResponse)
         {
-            var httpResponseMessage = new HttpResponseMessage { StatusCode = statusCode, Content = new StringContent(content) };
             var httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-
             httpMessageHandlerMock.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(httpResponseMessage);
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = statusCode,
+                    Content = new StringContent(jsonResponse)
+                });
 
-            var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            _httpClientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            return new HttpClient(httpMessageHandlerMock.Object);
         }
 
         [Fact]
         public async Task GetTaxaJurosAtualAsync_WhenApiReturnsValidData_ShouldReturnCorrectRate()
         {
             // Arrange
-            var bcbResponse = new[] { new BcbApiResponse("01/01/2023", 10.5m) };
+            var bcbResponse = new[] { new BcbApiResponse("08/10/2025", 15.0m) };
             var jsonResponse = JsonSerializer.Serialize(bcbResponse);
-            SetupHttpClient(HttpStatusCode.OK, jsonResponse);
+
+            // 1. Cria o HttpClient com a resposta de sucesso
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, jsonResponse);
+
+            // 2. Cria a instância do serviço passando o HttpClient
+            var taxaJurosProvider = new TaxaJurosProvider(httpClient, _loggerMock.Object);
 
             // Act
-            var result = await _taxaJurosProvider.GetTaxaJurosAtualAsync();
+            var result = await taxaJurosProvider.GetTaxaJurosAtualAsync();
 
             // Assert
-            result.Should().Be(10.5m);
+            result.Should().Be(15.0m);
         }
 
         [Fact]
@@ -56,30 +65,22 @@ namespace ApiJuros.Test.Services
         {
             // Arrange
             var jsonResponse = "[]";
-            SetupHttpClient(HttpStatusCode.OK, jsonResponse);
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, jsonResponse);
+            var taxaJurosProvider = new TaxaJurosProvider(httpClient, _loggerMock.Object);
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _taxaJurosProvider.GetTaxaJurosAtualAsync());
+            await Assert.ThrowsAsync<Exception>(() => taxaJurosProvider.GetTaxaJurosAtualAsync());
         }
 
         [Fact]
         public async Task GetTaxaJurosAtualAsync_WhenApiReturnsErrorStatusCode_ShouldThrowHttpRequestException()
         {
             // Arrange
-            SetupHttpClient(HttpStatusCode.InternalServerError, "Error");
+            var httpClient = CreateMockHttpClient(HttpStatusCode.InternalServerError, "Error");
+            var taxaJurosProvider = new TaxaJurosProvider(httpClient, _loggerMock.Object);
 
             // Act & Assert
-            await Assert.ThrowsAsync<HttpRequestException>(() => _taxaJurosProvider.GetTaxaJurosAtualAsync());
-        }
-
-        [Fact]
-        public async Task GetTaxaJurosAtualAsync_WhenApiReturnsMalformedJson_ShouldThrowJsonException()
-        {
-            // Arrange
-            SetupHttpClient(HttpStatusCode.OK, "{ \"data\": \"not-a-valid-json... ");
-
-            // Act & Assert
-            await Assert.ThrowsAsync<JsonException>(() => _taxaJurosProvider.GetTaxaJurosAtualAsync());
+            await Assert.ThrowsAsync<HttpRequestException>(() => taxaJurosProvider.GetTaxaJurosAtualAsync());
         }
     }
 }

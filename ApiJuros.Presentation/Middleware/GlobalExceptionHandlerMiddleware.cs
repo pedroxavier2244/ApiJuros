@@ -43,7 +43,7 @@ namespace ApiJuros.Presentation.Middleware
                     error = new
                     {
                         message = "Ocorreu um erro inesperado.",
-                        details = exception.ToString() 
+                        details = exception.ToString()
                     }
                 };
             }

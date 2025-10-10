@@ -6,28 +6,31 @@ using Moq.AutoMock;
 using AutoMapper;
 using Moq;
 using System.Threading.Tasks;
+using ApiJuros.Application.Interfaces;
+using ApiJuros.Domain;
+using AutoFixture;
 
 namespace ApiJuros.Test.Services
 {
     public class FinancialCalculatorServiceTests
     {
         private readonly AutoMocker _mocker;
+        private readonly Fixture _fixture;
         private readonly FinancialCalculatorService _service;
 
         public FinancialCalculatorServiceTests()
         {
             _mocker = new AutoMocker();
-            // O AutoMocker criará uma instância do serviço e injetará mocks de IMapper e ILogger.
+            _fixture = new Fixture();
             _service = _mocker.CreateInstance<FinancialCalculatorService>();
         }
 
         private void SetupMapper(InvestmentInput input)
         {
-            var baseOutput = new InvestmentOutput
-            {
-                InvestedAmount = input.InitialValue,
-                TimeInMonths = input.TimeInMonths
-            };
+            var baseOutput = _fixture.Build<InvestmentOutput>()
+                .With(x => x.InvestedAmount, input.InitialValue)
+                .With(x => x.TimeInMonths, input.TimeInMonths)
+                .Create();
 
             _mocker.GetMock<IMapper>()
                 .Setup(m => m.Map<InvestmentOutput>(input))
@@ -38,7 +41,12 @@ namespace ApiJuros.Test.Services
         public void CalculateCompoundInterest_WithValidInputs_ShouldCalculateCorrectly()
         {
             // Arrange
-            var input = new InvestmentInput(100, 1, 12);
+            var input = _fixture.Build<InvestmentInput>()
+                .With(i => i.InitialValue, 100)
+                .With(i => i.MonthlyInterestRate, 1)
+                .With(i => i.TimeInMonths, 12)
+                .Create();
+
             SetupMapper(input);
 
             // Act
@@ -52,7 +60,12 @@ namespace ApiJuros.Test.Services
         public void CalculateCompoundInterest_WhenInterestRateIsZero_ReturnsInitialValue()
         {
             // Arrange
-            var input = new InvestmentInput(1000, 0, 24);
+            var input = _fixture.Build<InvestmentInput>()
+                .With(i => i.InitialValue, 1000)
+                .With(i => i.MonthlyInterestRate, 0)
+                .With(i => i.TimeInMonths, 24)
+                .Create();
+
             SetupMapper(input);
 
             // Act
@@ -67,7 +80,12 @@ namespace ApiJuros.Test.Services
         public void CalculateCompoundInterest_WhenMonthsIsZero_ReturnsInitialValue()
         {
             // Arrange
-            var input = new InvestmentInput(250.75m, 0.5m, 0);
+            var input = _fixture.Build<InvestmentInput>()
+                .With(i => i.InitialValue, 250.75m)
+                .With(i => i.MonthlyInterestRate, 0.5m)
+                .With(i => i.TimeInMonths, 0)
+                .Create();
+
             SetupMapper(input);
 
             // Act
@@ -85,8 +103,7 @@ namespace ApiJuros.Test.Services
             decimal initialValue = 100;
             int months = 12;
             decimal annualInterestRate = 1; // 1% a.a
-            decimal expectedAmount = 101.00m; 
-
+            decimal expectedAmount = 101.00m;
 
             _mocker.GetMock<IMapper>().Setup(m => m.Map<InvestmentOutput>(It.IsAny<InvestmentInput>()))
                 .Returns((InvestmentInput i) => new InvestmentOutput { InvestedAmount = i.InitialValue, TimeInMonths = i.TimeInMonths });
@@ -106,7 +123,7 @@ namespace ApiJuros.Test.Services
             decimal initialValue = 500;
             int months = 6;
             decimal annualInterestRate = 2; // 2% a.a.
-            decimal expectedAmount = 504.97m; 
+            decimal expectedAmount = 504.97m;
 
             _mocker.GetMock<IMapper>().Setup(m => m.Map<InvestmentOutput>(It.IsAny<InvestmentInput>()))
                 .Returns((InvestmentInput i) => new InvestmentOutput { InvestedAmount = i.InitialValue, TimeInMonths = i.TimeInMonths });
