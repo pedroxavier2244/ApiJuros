@@ -146,6 +146,12 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddAutoMapper(typeof(IFinancialCalculatorService).Assembly);
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "ApiJuros_"; 
+});
+
 builder.Services.AddDbContext<ApiJurosDbContext>(options =>
 
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

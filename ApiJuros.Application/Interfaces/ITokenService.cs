@@ -1,5 +1,4 @@
-﻿
-using ApiJuros.Domain;
+﻿using ApiJuros.Domain;
 
 namespace ApiJuros.Application.Interfaces
 {
@@ -8,5 +7,3 @@ namespace ApiJuros.Application.Interfaces
         Task<string> CreateTokenAsync(ApplicationUser user);
     }
 }
-
-

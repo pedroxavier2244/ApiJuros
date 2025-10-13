@@ -27,32 +27,35 @@ namespace ApiJuros.Application.Services
         {
             _logger.LogInformation("Iniciando cálculo de juros para o valor inicial {InitialValue}", input.InitialValue);
 
-            var monthlyRate = input.MonthlyInterestRate / PercentageDivisor;
+            var monthlyRate = input.MonthlyInterestRate / PercentageDivisor; 
 
             if (input.TimeInMonths == 0)
             {
                 _logger.LogWarning("O cálculo foi solicitado para 0 meses. O juros total será zero.");
             }
-            decimal finalAmount = input.InitialValue;
-            for (int i = 0; i < input.TimeInMonths; i++)
-            {
-                finalAmount *= (1 + monthlyRate);
-            }
-            var roundedFinalAmount = Math.Round(finalAmount, DecimalPlacesToRound);
+
+            decimal finalAmount = input.InitialValue * (decimal)Math.Pow(1 + (double)monthlyRate, input.TimeInMonths);
+            decimal roundedFinalAmount = Math.Round(finalAmount, DecimalPlacesToRound);
+
             var totalInterest = roundedFinalAmount - input.InitialValue;
+
             var output = _mapper.Map<InvestmentOutput>(input);
             var finalResult = output with
             {
                 FinalAmount = roundedFinalAmount,
                 TotalInterest = totalInterest
             };
+
             _logger.LogInformation("Cálculo finalizado. Valor final: {FinalAmount}", finalResult.FinalAmount);
             return finalResult;
         }
 
         public async Task<InvestmentOutput> CalculateCompoundInterestWithAnnualRateAsync(decimal initialValue, int timeInMonths, decimal annualInterestRate)
         {
-            var monthlyInterestRate = ConverterTaxaAnualParaMensalEquivalente(annualInterestRate);
+            var taxaAnual = annualInterestRate / 100.0m;
+            var taxaMensalDecimal = (decimal)Math.Pow(1 + (double)taxaAnual, 1.0 / 12.0) - 1;
+
+            var monthlyInterestRate = taxaMensalDecimal * 100;
 
             var input = new InvestmentInput(initialValue, monthlyInterestRate, timeInMonths);
 
@@ -73,12 +76,11 @@ namespace ApiJuros.Application.Services
 
             return result;
         }
-
-        private decimal ConverterTaxaAnualParaMensalEquivalente(decimal taxaAnualPercentual)
+        private decimal ConverterTaxaAnualParaMensal(decimal taxaAnualPercentual)
         {
             var taxaAnual = taxaAnualPercentual / 100.0m;
             var taxaMensal = (decimal)Math.Pow(1 + (double)taxaAnual, 1.0 / 12.0) - 1;
-            return taxaMensal * 100;
+            return taxaMensal * 100; 
         }
     }
 }

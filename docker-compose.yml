@@ -1,16 +1,33 @@
 version: '3.8'
+
 services:
+  apijuros-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=ApiJurosDb;Username=postgres;Password=yourpassword
+    depends_on:
+      - db 
+      - redis-cache
+
   db:
     image: postgres:14
     container_name: apijuros-db
     environment:
       - POSTGRES_DB=ApiJurosDb
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=yourpassword 
+      - POSTGRES_PASSWORD=yourpassword
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  redis-cache:
+    image: redis:latest
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:

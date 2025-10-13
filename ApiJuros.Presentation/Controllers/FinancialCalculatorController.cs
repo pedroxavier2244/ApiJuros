@@ -1,10 +1,12 @@
 ﻿using ApiJuros.Application.DTOs;
 using ApiJuros.Application.Interfaces;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiJuros.Presentation.Controllers
 {
+    [Authorize]
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
