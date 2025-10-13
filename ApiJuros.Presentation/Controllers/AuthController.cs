@@ -23,9 +23,6 @@ namespace ApiJuros.Presentation.Controllers
             _tokenService = tokenService;
         }
 
-        /// <summary>
-        /// Regista um novo utilizador na aplicação.
-        /// </summary>
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -41,16 +38,12 @@ namespace ApiJuros.Presentation.Controllers
 
             if (!result.Succeeded)
             {
-                // Se houver erros (ex: password fraca, email já existe), retorna-os.
                 return BadRequest(result.Errors);
             }
 
             return Ok(new { Message = "Utilizador registrado com sucesso." });
         }
 
-        /// <summary>
-        /// Autentica um utilizador e retorna um token JWT.
-        /// </summary>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -69,7 +62,6 @@ namespace ApiJuros.Presentation.Controllers
                 return Unauthorized("Email ou password inválidos.");
             }
 
-            // Se o login for bem-sucedido, gera o token.
             var token = await _tokenService.CreateTokenAsync(user);
 
             return Ok(new LoginResponseDto(token));
