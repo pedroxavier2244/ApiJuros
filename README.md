@@ -1,121 +1,157 @@
-## 🏛️ Arquitetura do Projeto
+### 💹 API de Cálculo de Juros
+Uma API RESTful robusta construída com .NET 8 para realizar cálculos de juros compostos, integrada com serviços externos para taxas de juros em tempo real, e totalmente containerizada com Docker.
 
-A solução é dividida em quatro camadas, seguindo a regra de dependência onde as camadas externas sempre apontam para as internas.
+✨ Features Principais
+Autenticação e Autorização: Sistema seguro de registro e login de usuários com tokens JWT.
 
-  * 📦 **`ApiJuros.Domain`**: A camada mais interna. Contém as entidades e a lógica de negócio mais pura, sem dependências externas. (Neste projeto simples, ela está vazia, mas serve como base para futuras regras de negócio complexas).
+Cálculo de Juros: Endpoints para calcular juros compostos com taxas mensais ou anuais.
 
-  * ⚙️ **`ApiJuros.Application`**: Contém a lógica da aplicação (casos de uso). Define interfaces que são implementadas pelas camadas externas e utiliza os DTOs (Data Transfer Objects) para trafegar dados.
+Taxa SELIC em Tempo Real: Integração com a API do Banco Central do Brasil para obter a taxa SELIC atual.
 
-  * 🏗️ **`ApiJuros.Infrastructure`**: Implementa as interfaces definidas na camada de `Application`. É responsável por detalhes técnicos como acesso a banco de dados, consumo de outras APIs, etc. (Neste projeto, a implementação do serviço está na camada de `Application` por simplicidade, mas em um caso real, ela estaria aqui).
+Performance Otimizada: Uso de cache distribuído com Redis para reduzir a latência em chamadas externas.
 
-  * 🌐 **`ApiJuros.Presentation`**: A camada de entrada da aplicação. No nosso caso, é uma API Web ASP.NET Core que expõe os endpoints para o mundo externo e depende da camada de `Application` para executar as ações.
+Monitoramento: Endpoints de Health Checks para verificar a saúde da API, do banco de dados e de serviços externos.
+
+Containerização Completa: Ambiente de desenvolvimento e produção 100% containerizado com Docker e Docker Compose.
+
+Logging Estruturado: Logs detalhados e configuráveis com Serilog.
+
+Validação Robusta: Validação de dados de entrada utilizando FluentValidation.
+
+🏛️ Arquitetura do Projeto
+A solução segue os princípios da Clean Architecture, promovendo separação de conceitos, alta coesão e baixo acoplamento.
+
+📦 ApiJuros.Domain: Camada mais interna. Contém as entidades de negócio (ApplicationUser, Simulation).
+
+⚙️ ApiJuros.Application: Contém a lógica e os casos de uso da aplicação (Services), DTOs, interfaces e validações.
+
+🏗️ ApiJuros.Infrastructure: Implementa as interfaces da camada de Application. Responsável pelos detalhes de infraestrutura, como acesso ao banco de dados (Entity Framework), geração de tokens e repositórios.
+
+🌐 ApiJuros.Presentation: Camada de entrada da API (ASP.NET Core). Expõe os Controllers e endpoints para o mundo externo.
+
 
 **Fluxo de Dependência:**
-`Presentation` → `Infrastructure` → `Application` → `Domain`
-
-## ✨ Tecnologias Utilizadas
-
+`Presentation` → `Application`  → `Domain` ←  `Infrastructure` 
+                                       
+### ✨ Tecnologias Utilizadas
   * **.NET 8** (ou superior)
   * **ASP.NET Core**: Para a construção da API.
-  * **Swagger (Swashbuckle)**: Para documentação interativa da API.
-  * **FluentValidation**: Para validação declarativa e robusta dos dados de entrada.
+  * **ASP.NET Core Identity**: Para gerenciamento de usuários e autenticação.
+  * **JWT (JSON Web Tokens)**: Para autorização baseada em tokens.
+  * **Entity Framework Core**: ORM para comunicação com o banco de dados.
+  * **PostgreSQL**: Banco de dados relacional utilizado no projeto.
+  * **Redis**: Para caching distribuído de dados, melhorando a performance.
+  * **Docker & Docker Compose**: Para containerização completa da aplicação e seus serviços.
+  * **Swagger (Swashbuckle)**: Para documentação interativa e teste dos endpoints da API.
+  * **Serilog**: Para logging estruturado e configurável.
+  * **FluentValidation**: Para validação robusta e declarativa dos dados de entrada.
+  * **Health Checks**: Para monitoramento da saúde da aplicação e seus serviços.
+  * **xUnit, Moq & FluentAssertions**: Ferramentas para a criação de testes unitários.
 
-## 🚀 Instalação e Execução
+### 🚀 Como Executar
 
-### 1\. Instale as Dependências (NuGet)
+Opção 1: Usando Docker Compose (Recomendado)
+Este é o método mais simples e garante um ambiente consistente.
 
-Instale os pacotes necessários para validação e documentação da API.
+Pré-requisitos:
 
+Docker Desktop instalado e em execução.
+
+Passos:
+
+## 1\. Clone o repositório.
+
+## 2\. Abra um terminal na pasta raiz do projeto (onde o arquivo docker-compose.yml está localizado).
+
+## 3\. Execute o comando para construir as imagens e iniciar todos os containers (API, Banco de Dados e Redis):
 ```bash
-# Adicione o FluentValidation ao projeto Application
-dotnet add ApiJuros.Application/ApiJuros.Application.csproj package FluentValidation
-
-# Adicione o Swagger e a integração do FluentValidation ao projeto Presentation
-dotnet add ApiJuros.Presentation/ApiJuros.Presentation.csproj package Swashbuckle.AspNetCore
-dotnet add ApiJuros.Presentation/ApiJuros.Presentation.csproj package FluentValidation.AspNetCore
+docker-compose up --build -d
+```
+## 4\. Para parar todos os serviços, execute:
+```bash
+docker-compose down
 ```
 
-### 2\. Execute a Aplicação
+Opção 2: Localmente sem Docker
 
-Antes de rodar, é crucial confiar no certificado de desenvolvimento local para usar HTTPS.
+## Pré-requisitos:
+
+* **.NET 8 SDK**
+
+* **Um servidor PostgreSQL rodando localmente.**
+
+Passos:
+
+## 1\. Clone o repositório.
+
+## 2\. Atualize a `DefaultConnection` no arquivo ` appsettings.Development.json` com os dados do seu banco de dados local.
+
+## 3\. Confie no certificado de desenvolvimento local (execute apenas uma vez):
 
 ```bash
-# (Execute apenas uma vez por máquina para confiar no certificado HTTPS)
 dotnet dev-certs https --trust
+```
 
-# Navegue para a pasta da API
+### 4\. Navegue para a pasta do projeto principal e execute a aplicação:
+
+```bash
 cd ApiJuros.Presentation
-
-# Execute a aplicação
 dotnet run
 ```
 
-O terminal mostrará que o servidor está rodando, geralmente em `https://localhost:7xxx` e `http://localhost:5xxx`.
+### 💡 Como Usar a API
+Após iniciar a aplicação, a documentação interativa estará disponível no Swagger.
 
------
+* **URL do Swagger**: `http://localhost:8080/swagge1` (se estiver usando Docker)
 
-## 💡 Como Usar a API
+🔐 Autenticação
+A maioria dos endpoints requer um token de autenticação. O fluxo é o seguinte:
 
-Após executar a aplicação, abra seu navegador e acesse a documentação interativa do Swagger.
+## 1\. `POST /api/v1/auth/register`: Registre um novo usuário.
 
-> **URL do Swagger:** [https://localhost:7255/swagger](https://www.google.com/search?q=https://localhost:7255/swagger) (a porta pode variar).
+## 2\. `POST /api/v1/auth/login`: Faça login com o usuário criado para obter um token JWT.
 
-### Endpoint: `POST /api/FinancialCalculator/calculate-compound-interest`
+## 3\. Autorize no Swagger: Clique no botão "Authorize" no topo da página, e na janela que abrir, cole o token no formato `Bearer <seu_token_aqui>`.
 
-Calcula o valor final e os juros totais de um investimento com base em um valor inicial, uma taxa de juros mensal e um período em meses.
+## Endpoints Principais
+`GET /api/v1/FinancialCalculator/current-interest-rate`
+Retorna a taxa de juros SELIC atual, buscando da API do Banco Central. O resultado é mantido em cache no Redis para melhorar a performance.
 
------
+* **Autenticação: Requerida**.
 
-#### ✅ Exemplo de Sucesso
-
-**Corpo da Requisição (Request Body):**
-
-```json
+* **Resposta (200 OK)**:
+```JASON
 {
-  "initialValue": 1000,
-  "monthlyInterestRate": 1.5,
-  "timeInMonths": 24
+  "currentInterestRate": 10.5
 }
 ```
+`POST /api/v1/FinancialCalculator/calculate-with-selic-rate`
 
-**Resposta (Código `200 OK`):**
+Calcula um investimento com base na taxa SELIC atual. O resultado da simulação é salvo no banco de dados.
 
-```json
-{
-  "investedAmount": 1000,
-  "finalAmount": 1429.5,
-  "totalInterest": 429.5,
-  "timeInMonths": 24
-}
-```
-
------
-
-#### ❌ Exemplo de Validação (Erro)
-
-Se você enviar dados inválidos (ex: valores negativos), a API retornará um erro `400 Bad Request`.
-
-**Corpo da Requisição (Inválido):**
-
-```json
-{
-  "initialValue": -100,
-  "monthlyInterestRate": 1,
+* **Autenticação: Requerida**.
+* **Corpo da Requisição**:
+  ```JASON
+  {
+  "initialValue": 5000,
   "timeInMonths": 12
-}
-```
-
-**Resposta (Código `400 Bad Request`):**
-
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-  "title": "One or more validation errors occurred.",
-  "status": 400,
-  "errors": {
-    "InitialValue": [
-      "O valor inicial do investimento deve ser positivo."
-    ]
   }
-}
-```
+  ```
+    ```JASON
+  {
+  "investedAmount": 5000,
+  "finalAmount": 5525.16,
+  "totalInterest": 525.16,
+  "timeInMonths": 12
+  }
+  ```
+
+🩺 Monitoramento
+A aplicação expõe um painel de Health Checks para monitorar a saúde dos seus componentes.
+
+   **URL do Painel**: `http://localhost:8080/health-ui`
+
+Este painel verifica continuamente se:
+
+* A API do Banco Central está acessível.
+* A conexão com o banco de dados PostgreSQL está funcional.
