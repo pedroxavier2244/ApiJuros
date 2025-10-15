@@ -47,10 +47,8 @@ namespace ApiJuros.Test.Services
             var bcbResponse = new[] { new BcbApiResponse("08/10/2025", 15.0m) };
             var jsonResponse = JsonSerializer.Serialize(bcbResponse);
 
-            // 1. Cria o HttpClient com a resposta de sucesso
             var httpClient = CreateMockHttpClient(HttpStatusCode.OK, jsonResponse);
 
-            // 2. Cria a instância do serviço passando o HttpClient
             var taxaJurosProvider = new TaxaJurosProvider(httpClient, _loggerMock.Object);
 
             // Act

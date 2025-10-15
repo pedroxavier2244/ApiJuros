@@ -14,15 +14,21 @@ namespace ApiJuros.Application.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<TaxaJurosProvider> _logger;
-        private readonly IDistributedCache _cache; 
+        private readonly IDistributedCache _cache;
+        private ILogger<TaxaJurosProvider> @object;
         private const string BcbApiUrl = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json";
 
-        // Construtor atualizado
         public TaxaJurosProvider(HttpClient httpClient, ILogger<TaxaJurosProvider> logger, IDistributedCache cache)
         {
             _httpClient = httpClient;
             _logger = logger;
             _cache = cache; 
+        }
+
+        public TaxaJurosProvider(HttpClient httpClient, ILogger<TaxaJurosProvider> @object)
+        {
+            _httpClient = httpClient;
+            this.@object = @object;
         }
 
         public async Task<decimal> GetTaxaJurosAtualAsync()
